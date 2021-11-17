@@ -4,7 +4,7 @@ import time
 import numpy as np
 from gensim.models.word2vec import Word2Vec
 from model import BatchProgramClassifier
-from test.test import parser
+from prepareData.test import parser
 from torch.autograd import Variable
 
 

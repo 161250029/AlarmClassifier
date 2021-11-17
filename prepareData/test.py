@@ -1,8 +1,8 @@
 from gensim.models.word2vec import Word2Vec
-from clone.utils import get_blocks_v1 as func
+from prepareData.utils import get_blocks_v1 as func
 import torch
 import numpy as np
-from model import BatchTreeEncoder , BatchProgramClassifier
+from prepareData.model import BatchProgramClassifier
 
 class Parser:
     def parse(self , func):
@@ -53,7 +53,7 @@ class Parser:
 
 # construct dictionary and train word embedding
     def dictionary_and_embedding(self, ast , size):
-        from clone.utils import get_sequence as func
+        from prepareData.utils import get_sequence as func
         def trans_to_sequences(ast):
             sequence = []
             func(ast, sequence)
@@ -150,7 +150,7 @@ def test1():
         #         encodes.append(test_inputs[k][j])
         #
         # output = model(encodes, sum(lens))
-        # print('test encode:{} , type:{}'.format(output , output.shape))
+        # print('prepareData encode:{} , type:{}'.format(output , output.shape))
 
         model(test_inputs)
 
