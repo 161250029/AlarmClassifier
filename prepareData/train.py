@@ -3,8 +3,8 @@ import torch
 import time
 import numpy as np
 from gensim.models.word2vec import Word2Vec
-from model import BatchProgramClassifier
-from prepareData.test import parser
+from prepareData.model import BatchProgramClassifier
+from prepareData.test import Parser
 from torch.autograd import Variable
 
 
@@ -18,6 +18,7 @@ def get_batch(dataset, idx, bs):
 
 
 if __name__ == '__main__':
+    parser = Parser()
     train_data = parser.generate_block_seqs(parser.parse(parser.read('Main.java')))
     train_data = pd.DataFrame(train_data)
     test_data = parser.generate_block_seqs(parser.parse(parser.read('Main2.java')))

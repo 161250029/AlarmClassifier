@@ -157,18 +157,22 @@ class BatchProgramClassifier(nn.Module):
         seq, start, end = [], 0, 0
         for i in range(self.batch_size):
             end += lens[i]
+            # 标准化每个ast的长度为最大语句长度，便于使用gru做神经网络处理，一大亮点。针对语句个数不一致
             if max_len-lens[i]:
                 seq.append(self.get_zeros(max_len-lens[i]))
             seq.append(encodes[start:end])
+            # print(end - start)
             start = end
         encodes = torch.cat(seq)
+        # print(encodes.shape)
         encodes = encodes.view(self.batch_size, max_len, -1)
+
 
         print('encodes:{} , shape(encodes):{}'.format(encodes , encodes.shape))
 
-        # gru
+        # gru 重新设置了隐藏层(输出)的大小 ,初始化为100
         gru_out, hidden = self.bigru(encodes, self.hidden)
-        # print(gru_out.shape)
+        print(hidden.shape)
 
         gru_out = torch.transpose(gru_out, 1, 2)
         # pooling

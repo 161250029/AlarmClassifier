@@ -4,6 +4,7 @@ import torch
 import numpy as np
 from prepareData.model import BatchProgramClassifier
 
+
 class Parser:
     def parse(self , func):
         import javalang
@@ -156,17 +157,17 @@ def test1():
 
 def test2():
     parser = Parser()
-    train = parser.parse(parser.read('Main.java'))
+    train = parser.parse(parser.read('testData\\Main.java'))
     parser.dictionary_and_embedding(train, 128)
-    test = parser.parse(parser.read('Main2.java'))
+    test = parser.parse(parser.read('testData\\Main2.java'))
     parser.generate_block_seqs(test)
-    val = parser.parse(parser.read('Main1.java'))
+    val = parser.parse(parser.read('testData\\Main1.java'))
 
-    train_data = parser.generate_block_seqs(parser.parse(parser.read('Main.java')))
+    train_data = parser.generate_block_seqs(parser.parse(parser.read('testData\\Main.java')))
     train_data = [train_data]
-    test_data = parser.generate_block_seqs(parser.parse(parser.read('Main2.java')))
+    test_data = parser.generate_block_seqs(parser.parse(parser.read('testData\\Main2.java')))
     train_data.append(test_data)
-    val = parser.generate_block_seqs(parser.parse(parser.read('Main1.java')))
+    val = parser.generate_block_seqs(parser.parse(parser.read('testData\\Main1.java')))
     train_data.append(val)
 
     word2vec = Word2Vec.load("vocab/node_w2v_128").wv
