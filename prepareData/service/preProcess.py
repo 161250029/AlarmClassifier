@@ -22,10 +22,14 @@ class preProcess:
     def generateFeatures(self):
         dataFrame = pd.read_pickle(Config.programSourceInfoFilePath)
         dataFrame['code'] = dataFrame['code'].apply(parse)
-        dataFrame.to_pickle('ast.pkl')
+        dataFrame.to_pickle(Config.programASTFilePath)
 
-    def readFeatures(self):
-        dataFrame = pd.read_pickle('ast.pkl')
+    def readASTFeatures(self):
+        dataFrame = pd.read_pickle(Config.programASTFilePath)
+        return dataFrame
+
+    def readSourceCode(self):
+        dataFrame = pd.read_pickle(Config.programSourceInfoFilePath)
         return dataFrame
 
 
@@ -42,7 +46,8 @@ class preProcess:
 
 
 if __name__ == '__main__':
-    preProcess().readFeatures()
+    print(preProcess().readSourceCode())
+    print(preProcess().readASTFeatures())
 
 
 

@@ -91,22 +91,8 @@ def test1():
 
     model = BatchProgramClassifier(EMBEDDING_DIM, HIDDEN_DIM, MAX_TOKENS + 1, ENCODE_DIM, LABELS, BATCH_SIZE,
                                    USE_GPU, embeddings)
-
-    # model = BatchTreeEncoder(MAX_TOKENS + 1, EMBEDDING_DIM, ENCODE_DIM, BATCH_SIZE,
-    #                                USE_GPU, embeddings)
     if USE_GPU:
         model.cuda()
-
-    parameters = model.parameters()
-    # print('----model parameters----parameters:{},type(parameters):{}'.format(parameters, type(parameters)))
-    optimizer = torch.optim.Adamax(parameters)
-    loss_function = torch.nn.CrossEntropyLoss()
-
-    train_loss_ = []
-    val_loss_ = []
-    train_acc_ = []
-    val_acc_ = []
-    best_acc = 0.0
     print('Start training...')
     # training procedure
     best_model = model
@@ -117,22 +103,7 @@ def test1():
         train_inputs = train_data
         model.zero_grad()
         print(train_inputs)
-
         model(train_inputs)
-
-        #
-        # # 每个tree中节点数量
-        # lens = [len(item) for item in train_inputs]
-        # max_len = max(lens)
-        # # 一维数组,每一个元素代表语句所包含的节点index,即block
-        # encodes = []
-        # for k in range(BATCH_SIZE):
-        #     for j in range(lens[k]):
-        #         encodes.append(train_inputs[k][j])
-        # print('encodes:{} , type:{} , len:{}'.format(encodes , type(encodes) , len(encodes)))
-        # output = model(encodes , sum(lens))
-        # print('train encode:{} , type:{}'.format(output , output.shape))
-
     model = best_model
     i = 0
     while i < len(test_data):
@@ -140,19 +111,6 @@ def test1():
         test_inputs = test_data
         if USE_GPU:
             test_inputs = test_inputs
-
-        # # 每个tree中节点数量
-        # lens = [len(item) for item in test_inputs]
-        # max_len = max(lens)
-        # # 一维数组,每一个元素代表语句所包含的节点index,即block
-        # encodes = []
-        # for k in range(BATCH_SIZE):
-        #     for j in range(lens[k]):
-        #         encodes.append(test_inputs[k][j])
-        #
-        # output = model(encodes, sum(lens))
-        # print('prepareData encode:{} , type:{}'.format(output , output.shape))
-
         model(test_inputs)
 
 def test2():
@@ -161,7 +119,6 @@ def test2():
     parser.dictionary_and_embedding(train, 128)
     test = parser.parse(parser.read('testData\\Main2.java'))
     parser.generate_block_seqs(test)
-    val = parser.parse(parser.read('testData\\Main1.java'))
 
     train_data = parser.generate_block_seqs(parser.parse(parser.read('testData\\Main.java')))
     train_data = [train_data]
@@ -188,8 +145,6 @@ def test2():
         model.cuda()
 
     print('Start training...')
-    # training procedure
-    best_model = model
     i = 0
     while i < len(train_data):
         i += BATCH_SIZE
