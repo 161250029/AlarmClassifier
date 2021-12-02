@@ -164,6 +164,7 @@ class BatchProgramClassifier(nn.Module):
             start = end
         encodes = torch.cat(seq)
         # print(encodes.shape)
+        # resize : 将一条条语句整合成ast矩阵，-1 即为total / batch_size / max_len , 即为128.（机器计算）
         encodes = encodes.view(self.batch_size, max_len, -1)
 
 
@@ -182,6 +183,6 @@ class BatchProgramClassifier(nn.Module):
         print('gru_out:{} , type(gru_out):{} , len(gru_out):{}'.format(gru_out , type(gru_out) , gru_out.shape))
 
         # linear
-        # y = self.hidden2label(gru_out)
-        return gru_out
+        y = self.hidden2label(gru_out)
+        return (gru_out , y)
 

@@ -71,9 +71,6 @@ class Pipeline:
     def generate_block_seqs(self,data_path,part):
         from prepareData.utils import get_blocks_v1 as func
         from gensim.models.word2vec import Word2Vec
-
-        print(data_path)
-
         word2vec = Word2Vec.load(self.root+'train/embedding/node_w2v_' + str(self.size)).wv
         vocab = word2vec.vocab
         # 语料库的词汇个数 ， 猜测存疑
@@ -113,4 +110,4 @@ class Pipeline:
 
 if __name__ == '__main__':
     # Pipeline().run()
-    print(pd.read_pickle('test/blocks.pkl'))
+    print(pd.read_pickle('dev/blocks.pkl'))

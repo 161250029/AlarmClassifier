@@ -1,11 +1,9 @@
 import os
 import pandas as pd
 from prepareData.config import Config
-from prepareData.util.parser import parse
+import javalang
 
 class preProcess:
-    funcSourceDirPath = Config.funcSourceDirPath
-
     def toPickle(self):
         fileNames = self.readDir()
         features = [fileName.split('#') for fileName in  fileNames]
@@ -19,9 +17,15 @@ class preProcess:
         dataFrame.columns = Config.attribute
         dataFrame.to_pickle(Config.programSourceInfoFilePath)
 
+    def parse(self , func):
+        tokens = javalang.tokenizer.tokenize(func)
+        parser = javalang.parser.Parser(tokens)
+        tree = parser.parse_member_declaration()
+        return tree
+
     def generateFeatures(self):
         dataFrame = pd.read_pickle(Config.programSourceInfoFilePath)
-        dataFrame['code'] = dataFrame['code'].apply(parse)
+        dataFrame['code'] = dataFrame['code'].apply(self.parse)
         dataFrame.to_pickle(Config.programASTFilePath)
 
     def readASTFeatures(self):
@@ -35,19 +39,18 @@ class preProcess:
 
     def readDir(self):
         res = []
-        for root,dirs,files in os.walk(self.funcSourceDirPath):
+        for root,dirs,files in os.walk(Config.funcSourceDirPath):
             for file in  files:
-                res.append(file)
+                if file.endswith('java'):
+                    res.append(file)
         return res
 
     def run(self):
-        files = self.readDir()
-
-
+        self.toPickle()
+        self.generateFeatures()
 
 if __name__ == '__main__':
-    print(preProcess().readSourceCode())
+    preProcess().run()
     print(preProcess().readASTFeatures())
-
 
 

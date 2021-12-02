@@ -1,6 +1,5 @@
 from gensim.models.word2vec import Word2Vec
 from prepareData.utils import get_blocks_v1 as func
-import torch
 import numpy as np
 from prepareData.model import BatchProgramClassifier
 
@@ -147,12 +146,13 @@ def test2():
     print('Start training...')
     i = 0
     while i < len(train_data):
+        print('{}-{} data start to train.'.format(i , i + BATCH_SIZE - 1))
         i += BATCH_SIZE
         # print('i:{} , len(train_data):{}'.format(i , len(train_data)))
         train_inputs = train_data
         model.zero_grad()
-        print(train_inputs)
-        model(train_inputs)
+        res = model(train_inputs)
+        print('out:{} + type:{} + shape:{}'.format(res , type(res) , res.shape))
 
 
 if __name__ == '__main__':
