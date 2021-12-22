@@ -1,4 +1,5 @@
 from javalang.ast import Node
+import javalang.tree
 from prepareData.tree import BlockNode
 import sys
 sys.setrecursionlimit(10000)
@@ -45,6 +46,7 @@ def get_sequence(node, sequence):
 
 
 def get_blocks_v1(node, block_seq):
+    # 添加变量名merge
     name, children = get_token(node), get_children(node)
     logic = ['SwitchStatement','IfStatement', 'ForStatement', 'WhileStatement', 'DoStatement']
     if name in ['MethodDeclaration', 'ConstructorDeclaration']:

@@ -69,7 +69,7 @@ def trainWithLoss():
     HIDDEN_DIM = 100
     ENCODE_DIM = 128
     LABELS = 2
-    # EPOCHS = 15
+    EPOCHS = 5
     BATCH_SIZE = 64
     USE_GPU = False
     train_data = pd.read_pickle('../prepareData/service/train/blocks.pkl')
@@ -81,27 +81,26 @@ def trainWithLoss():
     optimizer = torch.optim.Adamax(parameters)
     loss_function = torch.nn.CrossEntropyLoss()
 
-    bestmodel = m
+    for epoch in range(EPOCHS):
+        i = 0
+        while i < len(train_data):
+            batch = get_batch(train_data, i, BATCH_SIZE)
+            i += BATCH_SIZE
+            train_inputs, train_labels = batch
+            optimizer.zero_grad()
+            # 不足批次大小的要重新设置batchsize
+            m.batch_size = len(train_labels)
+            # 同时需要重置隐藏层
+            m.hidden = m.init_hidden()
+            output, predict = m(train_inputs)
+            # print('res:{} , shape:{}'.format(output, output.shape))
 
-    while i < len(train_data):
-        print('{}-{} data start to train.'.format(i + 1, i + BATCH_SIZE))
-        batch = get_batch(train_data, i, BATCH_SIZE)
-        i += BATCH_SIZE
-        train_inputs, train_labels = batch
-        optimizer.zero_grad()
-        # 不足批次大小的要重新设置batchsize
-        m.batch_size = len(train_labels)
-        # 同时需要重置隐藏层
-        m.hidden = m.init_hidden()
-        output, predict = m(train_inputs)
-        print('res:{} , shape:{}'.format(output, output.shape))
+            # 反向传播，获得最佳模型
+            loss = loss_function(output, Variable(train_labels))
+            print('epoch:{} , loss:{}'.format(epoch , loss))
+            loss.backward()
+            optimizer.step()
 
-        # 反向传播，获得最佳模型
-        loss = loss_function(output, Variable(train_labels))
-        loss.backward()
-        optimizer.step()
-
-    m = bestmodel
     dev_data = pd.read_pickle('../prepareData/service/dev/blocks.pkl')
     astnnFeatures = []
     i = 0
@@ -118,13 +117,12 @@ def trainWithLoss():
         m.hidden = m.init_hidden()
         output , predict = m(dev_inputs)
         astnnFeatures.append(output)
-        print('res:{} , shape:{}'.format(output , output.shape))
+        # print('res:{} , shape:{}'.format(output , output.shape))
         loss = loss_function(output, Variable(dev_labels))
         print(loss)
 
         _, predicted = torch.max(predict, 1)
-        print(predicted)
-        print(dev_labels)
+        print('predicted:{} , dev_labels:{}'.format(predicted , dev_labels))
         total_acc += (predicted == dev_labels).sum()
         total += len(dev_labels)
         total_loss += loss.item() * len(dev_inputs)
@@ -150,7 +148,7 @@ def trainWithLoss():
         m.hidden = m.init_hidden()
         output, predict = m(test_inputs)
         astnnFeatures.append(output)
-        print('res:{} , shape:{}'.format(output, output.shape))
+        # print('res:{} , shape:{}'.format(output, output.shape))
         loss = loss_function(output, Variable(test_labels))
         print(loss)
 

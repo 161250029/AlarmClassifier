@@ -13,12 +13,12 @@ class MLPModel(Model):
     def train(self, x_train, y_train):
         self.model.fit(x_train, y_train)
 
-    def predict_proba(self, x_predict):
+    def predict_proba(self, x_test):
         pos_index = list(self.model.classes_).index(1)
-        return self.model.predict_proba(x_predict)[:pos_index]
+        return self.model.predict_proba(x_test)[:pos_index]
 
-    def predict(self, x_predict):
-        return self.model.predict(x_predict)
+    def predict(self, x_test):
+        return self.model.predict(x_test)
 
 if __name__ == '__main__':
     x = [[0], [1], [2], [3], [4], [5], [6], [7], [8]]

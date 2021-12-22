@@ -22,7 +22,6 @@ class BatchTreeEncoder(nn.Module):
         # pretrained  embedding
         if pretrained_weight is not None:
             self.embedding.weight.data.copy_(torch.from_numpy(pretrained_weight))
-            # self.embedding.weight.requires_grad = False
 
     def create_tensor(self, tensor):
         if self.use_gpu:
@@ -70,9 +69,14 @@ class BatchTreeEncoder(nn.Module):
         batch_current = self.W_c(batch_current.index_copy(0, Variable(self.th.LongTensor(index)),
                                                           self.embedding(Variable(self.th.LongTensor(current_node)))))
 
-        print('index:{} , children_index:{} , current_node:{} , children:{}'.format(index,
-                                                                                    children_index , current_node , children) )
-        print('batch_index:{}'.format(batch_index))
+        batch_current = self.activation(batch_current)
+        batch_current = self.W_r(batch_current)
+        batch_current = self.activation(batch_current)
+        batch_current = self.W_l(batch_current)
+
+        # print('index:{} , children_index:{} , current_node:{} , children:{}'.format(index,
+        #                                                                             children_index , current_node , children))
+        # print('batch_index:{}'.format(batch_index))
         for c in range(len(children)):
             zeros = self.create_tensor(Variable(torch.zeros(size, self.encode_dim)))
             batch_children_index = [batch_index[i] for i in children_index[c]]
@@ -80,7 +84,6 @@ class BatchTreeEncoder(nn.Module):
             if tree is not None:
                 # 这边代码逻辑好像有点问题，个人感觉应该是batch_children_index，但是看了前面的index，貌似没啥问题。用的是相对编号。
                 batch_current += zeros.index_copy(0, Variable(self.th.LongTensor(children_index[c])), tree)
-        # batch_current = F.tanh(batch_current)
 
         # 当前批次编号数组
         batch_index = [i for i in batch_index if i is not -1]
@@ -116,7 +119,7 @@ class BatchProgramClassifier(nn.Module):
         #class "BatchTreeEncoder"
         self.encoder = BatchTreeEncoder(self.vocab_size, self.embedding_dim, self.encode_dim,
                                         self.batch_size, self.gpu, pretrained_weight)
-        # gru
+        # gru 双向gru
         self.bigru = nn.GRU(self.encode_dim, self.hidden_dim, num_layers=self.num_layers, bidirectional=True,
                             batch_first=True)
         # linear
@@ -168,19 +171,19 @@ class BatchProgramClassifier(nn.Module):
         encodes = encodes.view(self.batch_size, max_len, -1)
 
 
-        print('encodes:{} , shape(encodes):{}'.format(encodes , encodes.shape))
+        # print('encodes:{} , shape(encodes):{}'.format(encodes , encodes.shape))
 
         # gru 重新设置了隐藏层(输出)的大小 ,初始化为100
         gru_out, hidden = self.bigru(encodes, self.hidden)
-        print(hidden.shape)
+        # print(hidden.shape)
 
         gru_out = torch.transpose(gru_out, 1, 2)
         # pooling
-        print('gru_out:{} , gru_out.size():{} , gru_out.shape():{}'.format(gru_out , gru_out.size(2) , gru_out.shape))
+        # print('gru_out:{} , gru_out.size():{} , gru_out.shape():{}'.format(gru_out , gru_out.size(2) , gru_out.shape))
         gru_out = F.max_pool1d(gru_out, gru_out.size(2)).squeeze(2)
         # gru_out = gru_out[:,-1]
 
-        print('gru_out:{} , type(gru_out):{} , len(gru_out):{}'.format(gru_out , type(gru_out) , gru_out.shape))
+        # print('gru_out:{} , type(gru_out):{} , len(gru_out):{}'.format(gru_out , type(gru_out) , gru_out.shape))
 
         # linear
         y = self.hidden2label(gru_out)

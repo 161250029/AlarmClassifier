@@ -78,6 +78,7 @@ class Pipeline:
         max_token = word2vec.syn0.shape[0]
         print(max_token)
 
+        # blocknode
         def tree_to_index(node):
             token = node.token
             result = [vocab[token].index if token in vocab else max_token]
@@ -109,5 +110,5 @@ class Pipeline:
         self.generate_block_seqs(self.test_file_path, 'test')
 
 if __name__ == '__main__':
-    # Pipeline().run()
+    Pipeline().run()
     print(pd.read_pickle('dev/blocks.pkl'))
