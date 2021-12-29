@@ -29,20 +29,20 @@ class lstm(nn.Module):
         x = self.layer2(x)
         return x
 
+if __name__ == '__main__':
+    model = lstm(2, 4, 2, 2)
 
-model = lstm(2, 4, 2, 2)
-
-x = torch.randn(2 , 3 , 2)
-x = [[[1 ,1],
-      [2 ,2],
-      [3 ,3]],
-     [[2,1],
-      [3,4],
-      [1,3]]]
-x = torch.FloatTensor(x)
-print(x.shape)
-print(model)
-output = model(x)
-print(output)
-_, predicted = torch.max(output, 1)
-print(predicted)
+    x = torch.randn(2, 3, 2)
+    x = [[[1, 1],
+          [2, 2],
+          [3, 3]],
+         [[2, 1],
+          [3, 4],
+          [1, 3]]]
+    x = torch.FloatTensor(x)
+    print(x.shape)
+    print(model)
+    output = model(x)
+    print(output)
+    _, predicted = torch.max(output, 1)
+    print(predicted)

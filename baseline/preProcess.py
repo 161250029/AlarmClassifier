@@ -36,22 +36,13 @@ class preProcess:
             self.workDirPath = self.methodTokenDirPath
             self.workStorePath = self.methodTokenStorePath
         fileNames = self.readDir()
-        metrics = self.readMetrics()
         features = [fileName.split('#') for fileName in  fileNames]
         lables = [feature[len(feature) - 1].split('.')[0] for feature in features]
-        fileTexts = [open(os.path.join(self.dirPath ,fileName)).read() for fileName in fileNames]
+        fileTexts = [open(os.path.join(self.workDirPath ,fileName)).read() for fileName in fileNames]
         for i in range(0 , len(features)):
             feature = features[i]
-            fileName = fileNames[i]
             feature[len(feature) - 1] = lables[i]
-            feature.append(fileTexts[i][:-1].split(','))
-            metricsFeature = metrics[metrics['fileName'] == fileName]
-            feature.append(metricsFeature.iloc[0]['lineNum'])
-            feature.append(metricsFeature.iloc[0]['statementNum'])
-            feature.append(metricsFeature.iloc[0]['branchStatementNum'])
-            feature.append(metricsFeature.iloc[0]['callNum'])
-            feature.append(metricsFeature.iloc[0]['cycleComplexity'])
-            feature.append(metricsFeature.iloc[0]['depth'])
+            feature.append(fileTexts[i])
         dataFrame = pd.DataFrame(features)
         dataFrame.columns = self.attribute
         dataFrame.to_pickle(self.workStorePath)
@@ -77,14 +68,15 @@ class preProcess:
         self.toPickle()
 
 if __name__ == '__main__':
-    # preProcess().run()
-    preProcess = preProcess('slice')
-    preProcess.run()
+    # preProcess = preProcess('slice')
+    # preProcess.run()
+    # print(preProcess.readSource())
     preProcess = preProcess('byte')
     preProcess.run()
-
-    preProcess = preProcess('method')
-    preProcess.run()
     print(preProcess.readSource())
+
+    # preProcess = preProcess('method')
+    # preProcess.run()
+    # print(preProcess.readSource())
 
 

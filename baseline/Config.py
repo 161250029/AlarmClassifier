@@ -1,14 +1,15 @@
 class Config:
-    sliceTokenDirPath = 'D:\\ASTFeature'
-    sliceTokenStorePath = 'token.pkl'
+    sliceTokenDirPath = 'D:\\FinalDesignData\\Project\\SliceToken'
+    sliceTokenStorePath = 'sliceToken.pkl'
 
-    byteTokenDirPath = 'D:\\'
+    byteTokenDirPath = 'D:\\FinalDesignData\\Project\\ByteToken'
     byteTokenStorePath = 'byteToken.pkl'
 
     methodTokenDirPath = "D:\\"
     methodTokenStorePath = 'methodToken.pkl'
 
-    metricsPath = 'D:\SliceFuncData\\metrics.xls'
+    metricsPath = 'D:\\SliceFuncData\\metrics.xls'
 
-    attribute = ['package', 'fileName', 'type', 'desc', 'priority', 'start', 'end', 'label', 'code',
-                 'lineNum', 'statementNum', 'branchStatementNum', 'callNum', 'cycleComplexity', 'depth']
+    attribute = ['package', 'version' , 'fileName', 'type', 'catogray', 'priority', 'rank' ,'start', 'end', 'label', 'code']
+
+            # 'lineNum', 'statementNum', 'branchStatementNum', 'callNum', 'cycleComplexity', 'depth'

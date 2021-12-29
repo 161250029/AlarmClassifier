@@ -4,7 +4,7 @@ import torch
 # CNN 主要还是用来做预测的
 # 三星
 from torch.autograd import Variable
-
+import torch.nn.functional as F
 
 class CNN(nn.Module):
     def __init__(self , vocab_size , embedding_dim , pretrained_weight):
@@ -20,7 +20,7 @@ class CNN(nn.Module):
         )
         self.dropout = nn.Dropout(0.2)
         self.sigmoid = nn.Sigmoid()
-        self.linear1 = nn.Linear(1728, 16)
+        self.linear1 = nn.Linear(32, 16)
         self.fc = nn.Linear(16 , 2)
 
     def get_zeros(self, num):
@@ -38,18 +38,21 @@ class CNN(nn.Module):
                 seq.append(self.get_zeros(max_len-lens[i]))
         out = torch.cat(seq)
         out = out.view(len(x) , max_len , -1)
-        print(out.shape)
+        # print(out.shape)
 
         out = out.unsqueeze(1)
 
-        print(out.shape)
+        # print(out.shape)
 
         out = self.conv1(out)
-        print(out.shape)
-        out = out.view(len(x), -1)
-        print(out.shape)
+        # print(out.shape)
         out = self.dropout(out)
         out = self.sigmoid(out)
+        out = out.squeeze(-1)
+        # print(out.shape)
+        # 池化
+        out = F.max_pool1d(out, out.size(2)).squeeze(2)
+        # print(out.shape)
         out = self.linear1(out)
         return self.fc(out)
 

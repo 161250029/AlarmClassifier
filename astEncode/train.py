@@ -3,12 +3,9 @@ import pandas as pd
 from gensim.models.word2vec import Word2Vec
 import numpy as np
 from torch.autograd import Variable
+import matplotlib.pyplot as plt
 
-import os
-import sys
-p = os.path.dirname(os.path.dirname((os.path.abspath('__file__'))))
-if p not in sys.path:
-    sys.path.append(p)
+
 from astEncode import BatchProgramClassifier
 
 def get_batch(dataset, idx, bs):
@@ -65,7 +62,6 @@ def trainWithLoss():
     MAX_TOKENS = word2vec.syn0.shape[0]
     EMBEDDING_DIM = word2vec.syn0.shape[1]
     print('MAX_TOKENS:{} , EMBEDDING_DIM:{}'.format(MAX_TOKENS, EMBEDDING_DIM))
-    i = 0
     HIDDEN_DIM = 100
     ENCODE_DIM = 128
     LABELS = 2
@@ -96,7 +92,7 @@ def trainWithLoss():
             # print('res:{} , shape:{}'.format(output, output.shape))
 
             # 反向传播，获得最佳模型
-            loss = loss_function(output, Variable(train_labels))
+            loss = loss_function(predict, Variable(train_labels))
             print('epoch:{} , loss:{}'.format(epoch , loss))
             loss.backward()
             optimizer.step()
@@ -107,6 +103,7 @@ def trainWithLoss():
     total_acc = 0
     total = 0
     total_loss = 0
+
     while i < len(dev_data):
         batch = get_batch(dev_data, i, BATCH_SIZE)
         i += BATCH_SIZE
@@ -118,11 +115,12 @@ def trainWithLoss():
         output , predict = m(dev_inputs)
         astnnFeatures.append(output)
         # print('res:{} , shape:{}'.format(output , output.shape))
-        loss = loss_function(output, Variable(dev_labels))
+        loss = loss_function(predict, Variable(dev_labels))
         print(loss)
 
         _, predicted = torch.max(predict, 1)
         print('predicted:{} , dev_labels:{}'.format(predicted , dev_labels))
+
         total_acc += (predicted == dev_labels).sum()
         total += len(dev_labels)
         total_loss += loss.item() * len(dev_inputs)
@@ -138,6 +136,11 @@ def trainWithLoss():
     total_acc = 0
     total = 0
     total_loss = 0
+
+    TP = 0
+    TN = 0
+    FP = 0
+    FN = 0
     while i < len(test_data):
         batch = get_batch(test_data, i, BATCH_SIZE)
         i += BATCH_SIZE
@@ -149,19 +152,52 @@ def trainWithLoss():
         output, predict = m(test_inputs)
         astnnFeatures.append(output)
         # print('res:{} , shape:{}'.format(output, output.shape))
-        loss = loss_function(output, Variable(test_labels))
+        loss = loss_function(predict, Variable(test_labels))
         print(loss)
 
         _, predicted = torch.max(predict, 1)
         print('predicted:{} , test_labels:{}'.format(predicted , test_labels))
+
+        TP += ((predicted == 1) & (test_labels.data == 1)).cpu().sum()
+        # TN    predict 和 label 同时为0
+        TN += ((predicted == 0) & (test_labels.data == 0)).cpu().sum()
+        # FN    predict 0 label 1
+        FN += ((predicted == 0) & (test_labels.data == 1)).cpu().sum()
+        # FP    predict 1 label 0
+        FP += ((predicted == 1) & (test_labels.data == 0)).cpu().sum()
+
         total_acc += (predicted == test_labels).sum()
         total += len(test_labels)
         total_loss += loss.item() * len(test_inputs)
+
+    precision = TP / (TP + FP)
+    recall = TP / (TP + FN)
+    f1 = 2 * recall * precision / (recall + precision)
+    acc = (TP + TN) / (TP + TN + FP + FN)
     print("Testing results(Acc):", total_acc.item() / total)
+    print('TP:{} , TN:{} , FP:{} , FN:{} , total_acc:{}'.format(TP, TN, FP, FN, total_acc))
+    print("Precision:{} , Recall:{} , F1:{} , ACC:{}".format(precision, recall, f1, acc))
+
     astnnFeatures = torch.cat(astnnFeatures)
     # tensor转list
     test_data['astnn'] = astnnFeatures.tolist()
     test_data.to_pickle('../prepareData/service/test/bestFeatures.pkl')
+    visualization(precision, recall, f1, acc)
+
+def visualization(precision , recall , f1 , acc):
+    x = ['precision' , 'recall' , 'f1' , 'acc']
+    y = [precision , recall , f1 , acc]
+    fig, ax = plt.subplots()
+    b = ax.bar(x, y)
+    plt.bar(range(len(y)), y, color='rbg', tick_label=x)
+    for a, b in zip(x, y):
+        ax.text(a, b + 1, b, ha='center', va='bottom')
+
+    plt.title('Numbers of Four eventtypes')
+    plt.xlabel('Eventtype')
+    plt.ylabel('Number')
+
+    plt.savefig('./test.png')
 
 if __name__ == '__main__':
     trainWithLoss()
