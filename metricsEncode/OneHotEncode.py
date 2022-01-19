@@ -1,19 +1,22 @@
 from sklearn.preprocessing import OneHotEncoder
-import sklearn
 
 class OneHotEncode:
     # features: 二维数组
-    def __init__(self , features):
-        self.features = features
+    def __init__(self):
         self.onehot = OneHotEncoder(handle_unknown='ignore')
 
-    def transform(self):
-        print(self.features)
-        return self.onehot.fit_transform(self.features).toarray()
+    def transform(self , features):
+        return self.onehot.fit_transform(features).toarray()
 
 if __name__ == '__main__':
-    model = OneHotEncode([['Male' , 1], ['NONE' , 3], ['Female' , 5] , ['test' , 7] ,['Male' , 1]])
-    print(model.transform())
+    model = OneHotEncode()
+    res = model.transform([['Male' , 1], ['NONE' , 3], ['Female' , 5] , ['test' , 7] ,['Male' , 1]])
+
+    print(res)
+
+    print(type(res))
+
+    print(res.tolist())
 
     enc = OneHotEncoder()
     enc.fit([[0, 0, 3],

@@ -21,7 +21,10 @@ class CNN(nn.Module):
         self.dropout = nn.Dropout(0.2)
         self.sigmoid = nn.Sigmoid()
         self.linear1 = nn.Linear(32, 16)
-        self.fc = nn.Linear(16 , 2)
+        # self.fc = nn.Linear(16 , 2)
+
+        # linear nn.Softmax(dim=None) 归一化
+        self.fc = nn.Sequential(nn.Linear(16, 2), nn.Dropout(p=0.2))
 
     def get_zeros(self, num):
         zeros = Variable(torch.zeros(num, 128))

@@ -10,7 +10,10 @@ class lstm(nn.Module):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.layer1 = nn.LSTM(input_size, hidden_size, num_layer)
-        self.layer2 = nn.Linear(hidden_size, output_size)
+        # self.layer2 = nn.Linear(hidden_size, output_size)
+
+        # linear nn.Softmax(dim=None) 归一化
+        self.linear = nn.Sequential(nn.Linear(hidden_size, output_size), nn.Dropout(p=0.2))
 
     def forward(self, x):
         # (batch_size , seq_length , hidden_size)
@@ -21,7 +24,7 @@ class lstm(nn.Module):
         # 降维，去除seq_length
         # (batch_size , hidden_size)
         x = F.max_pool1d(x, x.size(2)).squeeze(2)
-        x = self.layer2(x)
+        x = self.linear(x)
         return x
 
 if __name__ == '__main__':

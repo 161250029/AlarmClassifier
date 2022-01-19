@@ -1,11 +1,11 @@
 class Config:
-    sliceTokenDirPath = 'D:\\FinalDesignData\\Project\\SliceToken'
+    sliceTokenDirPath = '/root/GY/project/SliceToken'
     sliceTokenStorePath = 'sliceToken.pkl'
 
-    byteTokenDirPath = 'D:\\FinalDesignData\\Project\\ByteToken'
+    byteTokenDirPath = '/root/GY/project/ByteToken'
     byteTokenStorePath = 'byteToken.pkl'
 
-    methodTokenDirPath = "D:\\"
+    methodTokenDirPath = "/root/GY/project/FiveLines"
     methodTokenStorePath = 'methodToken.pkl'
 
     metricsPath = 'D:\\SliceFuncData\\metrics.xls'

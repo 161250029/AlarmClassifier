@@ -44,7 +44,7 @@ class Word2VecSerice:
 
 
 if __name__ == '__main__':
-    service = Word2VecSerice([['i' , 'love' , 'u'] , ['i' , 'like' , 'him']] , 'word.model')
+    service = Word2VecSerice([['i' , 'love' , 'u'] , ['i' , 'like' , 'him']], 'word.model')
     service.train()
     print(service.model.wv.index2word[0])
     print(service.model.wv.syn0.shape)

@@ -59,7 +59,7 @@ class preProcess:
     def readDir(self):
         res = []
         for root,dirs,files in os.walk(self.workDirPath):
-            for file in  files:
+            for file in files:
                 if file.endswith('java'):
                     res.append(file)
         return res
@@ -68,15 +68,16 @@ class preProcess:
         self.toPickle()
 
 if __name__ == '__main__':
-    # preProcess = preProcess('slice')
-    # preProcess.run()
-    # print(preProcess.readSource())
-    preProcess = preProcess('byte')
-    preProcess.run()
-    print(preProcess.readSource())
+    Process1 = preProcess('slice')
+    Process1.run()
+    print(Process1.readSource())
 
-    # preProcess = preProcess('method')
-    # preProcess.run()
-    # print(preProcess.readSource())
+    Process2 = preProcess('byte')
+    Process2.run()
+    # print(Process2.readSource())
+
+    Process3 = preProcess('method')
+    Process3.run()
+    # print(Process3.readSource())
 
 
