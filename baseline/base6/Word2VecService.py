@@ -2,10 +2,12 @@ from gensim.models import Word2Vec
 
 class Word2VecSerice:
 
+    # text: 二维数组
     def __init__(self , texts , model_path):
         self.model = None
         self.texts = texts
         self.model_path = model_path
+
 
     def train(self):
         # skip_gram
@@ -43,7 +45,7 @@ class Word2VecSerice:
 
 
 if __name__ == '__main__':
-    service = Word2VecSerice([['i' , 'love' , 'u'] , ['i' , 'like' , 'him']], 'word.model')
+    service = Word2VecSerice([['i' , 'love' , 'u'] , ['i' , 'like' , 'him']] , 'word.model')
     service.train()
     print(service.model.wv.index2word[0])
     print(service.model.wv.syn0.shape)

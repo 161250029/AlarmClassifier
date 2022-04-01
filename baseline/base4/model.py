@@ -65,7 +65,7 @@ class BatchTreeEncoder(nn.Module):
             else:
                 batch_index[i] = -1
 
-        # 当前层的向量表示,采用相对位置数组index
+        # 当前层的向量表示,cur_node向量表示复制到其所对应位置的batch_current中
         batch_current = self.W_c(batch_current.index_copy(0, Variable(self.th.LongTensor(index)),
                                                           self.embedding(Variable(self.th.LongTensor(current_node)))))
 
@@ -101,7 +101,6 @@ class BatchTreeEncoder(nn.Module):
 
 
 class BatchProgramClassifier(nn.Module):
-    # def __init__(self, embedding_dim, hidden_dim, vocab_size, encode_dim, label_size, batch_size, use_gpu=True, pretrained_weight=None):
     def __init__(self, embedding_dim, hidden_dim, vocab_size, encode_dim, label_size, batch_size, use_gpu=True, pretrained_weight=None):
         super(BatchProgramClassifier, self).__init__()
         self.stop = [vocab_size-1]
@@ -113,7 +112,6 @@ class BatchProgramClassifier(nn.Module):
         self.embedding_dim = embedding_dim
         self.encode_dim = encode_dim
         self.label_size = label_size
-        #class "BatchTreeEncoder"
         self.encoder = BatchTreeEncoder(self.vocab_size, self.embedding_dim, self.encode_dim,
                                         self.batch_size, self.gpu, pretrained_weight)
         # gru 双向gru

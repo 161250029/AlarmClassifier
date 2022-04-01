@@ -96,7 +96,7 @@ class preProcess:
 
         # 索引重排很重要
         dataFrame = dataFrame.reset_index(drop=True)
-        dataFrame['code'] = pd.Series(asts)
+        dataFrame['ast'] = pd.Series(asts)
         return dataFrame
 
     def generate_ast(self):
@@ -120,8 +120,9 @@ class preProcess:
             for version in versions:
                 version_dir_path = os.path.join(project_dir_path , version)
                 func_file_path = os.path.join(version_dir_path , self.funcBodyName)
+                if not os.path.exists(func_file_path):
+                    continue
                 dataFrame = self.generateFeatures(func_file_path)
-                print(dataFrame)
                 ast_file_path = os.path.join(version_dir_path , self.astName)
                 dataFrame.to_pickle(ast_file_path)
 
@@ -167,6 +168,5 @@ class preProcess:
 if __name__ == '__main__':
     Process1 = preProcess()
     Process1.generate_ast()
-    # print(Process3.readSource())
 
 

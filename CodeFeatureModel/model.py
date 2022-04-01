@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 
 class BatchTreeEncoder(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, encode_dim, batch_size, use_gpu, pretrained_weight=None):
+    def __init__(self, vocab_size, embedding_dim, encode_dim, batch_size, pretrained_weight=None):
         super(BatchTreeEncoder, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.encode_dim = encode_dim
@@ -15,17 +15,14 @@ class BatchTreeEncoder(nn.Module):
         self.activation = F.relu
         self.stop = -1
         self.batch_size = batch_size
-        self.use_gpu = use_gpu
         self.node_list = []
-        self.th = torch.cuda if use_gpu else torch
+        self.th = torch
         self.batch_node = None
         # pretrained  embedding
         if pretrained_weight is not None:
             self.embedding.weight.data.copy_(torch.from_numpy(pretrained_weight))
 
     def create_tensor(self, tensor):
-        if self.use_gpu:
-            return tensor.cuda()
         return tensor
 
     # node:语句数组,batch_index:当前处理语句对应编号
@@ -65,14 +62,11 @@ class BatchTreeEncoder(nn.Module):
             else:
                 batch_index[i] = -1
 
-        # 当前层的向量表示,采用相对位置数组index
+        # 当前层的向量表示,cur_node向量表示复制到其所对应位置的batch_current中
         batch_current = self.W_c(batch_current.index_copy(0, Variable(self.th.LongTensor(index)),
                                                           self.embedding(Variable(self.th.LongTensor(current_node)))))
 
-        batch_current = self.activation(batch_current)
-        batch_current = self.W_r(batch_current)
-        batch_current = self.activation(batch_current)
-        batch_current = self.W_l(batch_current)
+        # batch_current = self.activation(batch_current)
 
         # print('index:{} , children_index:{} , current_node:{} , children:{}'.format(index,
         #                                                                             children_index , current_node , children))
@@ -103,44 +97,37 @@ class BatchTreeEncoder(nn.Module):
         return torch.max(self.node_list, 0)[0]
 
 
-class BatchProgramClassifier(nn.Module):
-    def __init__(self, embedding_dim, hidden_dim, vocab_size, encode_dim, label_size, batch_size, use_gpu=True, pretrained_weight=None):
-        super(BatchProgramClassifier, self).__init__()
+class CodeFeatureModel(nn.Module):
+    def __init__(self, embedding_dim, hidden_dim, vocab_size, encode_dim, label_size, batch_size, pretrained_weight=None):
+        super(CodeFeatureModel, self).__init__()
         self.stop = [vocab_size-1]
         self.hidden_dim = hidden_dim
         self.num_layers = 1
-        self.gpu = use_gpu
         self.batch_size = batch_size
         self.vocab_size = vocab_size
         self.embedding_dim = embedding_dim
         self.encode_dim = encode_dim
         self.label_size = label_size
-        #class "BatchTreeEncoder"
         self.encoder = BatchTreeEncoder(self.vocab_size, self.embedding_dim, self.encode_dim,
-                                        self.batch_size, self.gpu, pretrained_weight)
+                                        self.batch_size,  pretrained_weight)
         # gru 双向gru
         self.bigru = nn.GRU(self.encode_dim, self.hidden_dim, num_layers=self.num_layers, bidirectional=True,
                             batch_first=True)
         # linear
         self.hidden2label = nn.Linear(self.hidden_dim * 2, self.label_size)
+
+        # linear nn.Softmax(dim=None) 归一化
+        # self.linear = nn.Sequential(nn.Linear(self.hidden_dim * 2, self.label_size), nn.Dropout(p=0.2) , nn.Softmax(dim=None))
+
         # hidden
         self.hidden = self.init_hidden()
         self.dropout = nn.Dropout(0.2)
 
     def init_hidden(self):
-        if self.gpu is True:
-            if isinstance(self.bigru, nn.LSTM):
-                h0 = Variable(torch.zeros(self.num_layers * 2, self.batch_size, self.hidden_dim).cuda())
-                c0 = Variable(torch.zeros(self.num_layers * 2, self.batch_size, self.hidden_dim).cuda())
-                return h0, c0
-            return Variable(torch.zeros(self.num_layers * 2, self.batch_size, self.hidden_dim)).cuda()
-        else:
-            return Variable(torch.zeros(self.num_layers * 2, self.batch_size, self.hidden_dim))
+        return Variable(torch.zeros(self.num_layers * 2, self.batch_size, self.hidden_dim))
 
     def get_zeros(self, num):
         zeros = Variable(torch.zeros(num, self.encode_dim))
-        if self.gpu:
-            return zeros.cuda()
         return zeros
 
     def forward(self, x):

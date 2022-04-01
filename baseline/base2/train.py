@@ -49,7 +49,7 @@ class BaseLine2(Base):
         vocab_size = self.vocab_model.get_vocab_size()
         embedding_dim = self.vocab_model.get_embedding_dim()
         model = CNN(vocab_size, embedding_dim, embedding)
-        EPCHO = 15
+        EPCHO = self.EPOCHS
 
         loss_function = torch.nn.CrossEntropyLoss()
         parameters = model.parameters()

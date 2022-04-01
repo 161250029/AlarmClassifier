@@ -30,7 +30,7 @@ class BaseLine4(Base):
         tokens = []
         labels = []
         for _, item in data.iterrows():
-            tokens.append(item['code'])
+            tokens.append(item['ast'])
             label = 1 if item['label'] == 'true' else 0
             labels.append(label)
         return tokens, torch.LongTensor(labels)
@@ -75,7 +75,7 @@ class BaseLine4(Base):
         self.vocab_model = w2v
 
 
-    def train(self , train_data, train_label, test_data, test_label):
+    def train(self, train_data, train_label, test_data, test_label):
         word2vec = self.vocab_model.wv
         embeddings = np.zeros((word2vec.syn0.shape[0] + 1, word2vec.syn0.shape[1]), dtype="float32")
         embeddings[:word2vec.syn0.shape[0]] = word2vec.syn0
@@ -86,7 +86,7 @@ class BaseLine4(Base):
         HIDDEN_DIM = 100
         ENCODE_DIM = 128
         LABELS = 2
-        EPOCHS = 15
+        EPOCHS = self.EPOCHS
         BATCH_SIZE = 64
         USE_GPU = False
 
@@ -162,4 +162,4 @@ class BaseLine4(Base):
 
 if __name__ == '__main__':
     baseline4 = BaseLine4()
-    baseline4.run()
+    baseline4.re_run()

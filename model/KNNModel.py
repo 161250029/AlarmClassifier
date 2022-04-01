@@ -6,6 +6,7 @@ from model import Model
 class KNNModel(Model):
 
     def __init__(self):
+        super(KNNModel, self).__init__()
         self.model = KNeighborsClassifier(n_neighbors=3)
 
     def train(self, x_train, y_train):

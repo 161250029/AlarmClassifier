@@ -42,13 +42,8 @@ class Base:
 
         self.label_all = []
 
+        self.EPOCHS = 15
 
-    @abc.abstractmethod
-    def run(self):
-        """
-        baseline运行
-        """
-        pass
 
     @abc.abstractmethod
     def train_vocab(self):
@@ -127,6 +122,9 @@ class Base:
     def run(self):
         self.init_project_versions()
         for project , versions in self.project_versions_dict.items():
+            # 临时加以限制
+            # if project not in ['camel-core' , 'cassandra-all']:
+            #     continue
             result = []
             baseline_dir_path = os.path.join(os.path.join(self.root, project) , self.baseName)
             if not os.path.exists(baseline_dir_path):
@@ -160,8 +158,63 @@ class Base:
                 Base.visualization(precision, recall, f1, acc, auc , mcc, g_measure , os.path.join(baseline_dir_path , pic_file_name))
             dataframe = pd.DataFrame(result)
             dataframe.columns = ["project" , "version1" , "version2" , "TP" , "TN" ,"FP" , "FN" , "precision" , "recall" , "f1" , "acc" , "auc" , "mcc" , "g_measure"]
-            dataframe.to_csv(os.path.join(baseline_dir_path , 'result.csv'))
+            dataframe.to_csv(os.path.join(baseline_dir_path , 'result.csv') , index=False)
 
+
+    def re_run(self):
+        self.init_project_versions()
+        self.EPOCHS = 30
+        for project , versions in self.project_versions_dict.items():
+            # 临时加以限制
+            if project not in ['camel-core', 'cassandra-all']:
+                continue
+            result = []
+            baseline_dir_path = os.path.join(os.path.join(self.root, project) , self.baseName)
+            res_file_path = os.path.join(baseline_dir_path , 'result.csv')
+            # 去除索引列
+            dataFrame = pd.read_csv(res_file_path , encoding='utf-8')
+            print(dataFrame)
+            for _, item in dataFrame.iterrows():
+                if item.isnull().any():
+                    version1 = item['version1']
+                    version2 = item['version2']
+                    print('project:{} , version:{}-{} start'.format(project, version1, version2))
+                    self.clear()
+                    train_dir_path = os.path.join(os.path.join(self.root, project), version1)
+                    train_file_path = os.path.join(train_dir_path, self.train_data_file_name)
+                    self.train_data_path = train_file_path
+                    train_data, train_label = self.getData(train_file_path)
+
+                    test_dir_path = os.path.join(os.path.join(self.root, project), version2)
+                    test_file_path = os.path.join(test_dir_path, self.test_data_file_name)
+                    self.test_data_path = test_file_path
+                    test_data, test_label = self.getData(test_file_path)
+
+                    self.total_data = train_data.copy()
+                    self.total_data.extend(test_data)
+                    self.train_data = train_data
+                    print('total:{} , train:{} , test:{}'.format(len(self.total_data), len(train_data), len(test_data)))
+
+                    self.train_vocab()
+
+                    self.train(train_data, train_label, test_data, test_label)
+
+                    TP, TN, FP, FN, precision, recall, f1, acc, auc, mcc, g_measure = self.calculate_metrics()
+                    result.append([project, version1, version2, TP, TN, FP, FN, precision, recall, f1, acc, auc, mcc,
+                                   g_measure])
+                    pic_file_name = '_'.join([version1, version2])+ '.png'
+                    Base.visualization(precision, recall, f1, acc, auc, mcc, g_measure,
+                                       os.path.join(baseline_dir_path, pic_file_name))
+                else:
+                    row = item.values.tolist()
+                    if len(row) == 15:
+                        row.pop(0)
+                    result.append(row)
+            dataframe = pd.DataFrame(result)
+            dataframe.columns = ["project", "version1", "version2", "TP", "TN", "FP", "FN", "precision", "recall",
+                                     "f1", "acc", "auc", "mcc", "g_measure"]
+            # 不写索引列
+            dataframe.to_csv(res_file_path , index=False)
 
     def split_data(self , tokens, labels):
         data_num = len(tokens)

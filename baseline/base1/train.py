@@ -57,7 +57,7 @@ class BaseLine1(Base):
         # train_features = vectorlize(tokens, train_data)
         # test_features = vectorlize(tokens, test_data)
 
-        EPOCHS = 15
+        EPOCHS = self.EPOCHS
 
         input_size = 128
         # 4

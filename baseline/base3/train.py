@@ -59,7 +59,7 @@ class BaseLine3(Base):
         optimizer = torch.optim.Adadelta(parameters)
         loss_function = torch.nn.CrossEntropyLoss()
 
-        EPOCHS = 15
+        EPOCHS = self.EPOCHS
         batch_size = 64
         for epcho in range(EPOCHS):
             i = 0
@@ -89,7 +89,7 @@ class BaseLine3(Base):
             i += batch_size
 if __name__ == '__main__':
     baseline3 = BaseLine3()
-    baseline3.run()
+    baseline3.re_run()
 
 
 

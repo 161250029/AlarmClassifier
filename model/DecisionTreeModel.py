@@ -1,10 +1,8 @@
-
 from model import Model
-
 from sklearn.tree import DecisionTreeClassifier
-
 class DecisionTreeModel(Model):
     def __init__(self):
+        super(DecisionTreeModel, self).__init__()
         self.model = DecisionTreeClassifier(random_state=0, max_depth=2)
 
     def train(self, x_train, y_train):
